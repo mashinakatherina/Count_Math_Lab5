@@ -120,7 +120,7 @@ public class MainFrame extends JFrame {
             }
 
             tmpCounter = functions.get(numberFunction).getFunctionNumber();
-            points = EulerMethod.calculate(x0Arg, y0Arg, xnArg, precisionArg);
+            points = EulerMethod.calculateByEulerMethod(x0Arg, y0Arg, xnArg, precisionArg);
             initDataset();
         });
         actionButton.setAlignmentX(Component.CENTER_ALIGNMENT);

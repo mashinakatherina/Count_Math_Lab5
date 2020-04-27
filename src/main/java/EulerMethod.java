@@ -11,7 +11,7 @@ public class EulerMethod {
      * @param precision - точность
      * @return - массив точек, который дальше будет отрисовываться
      */
-    public static List<Point> calculate(double x0, double y0, double lastX, double precision) {
+    public static List<Point> calculateByEulerMethod(double x0, double y0, double lastX, double precision) {
         List<Point> points = new ArrayList<>();
 
         int amountOfNodes = (int) ((lastX - x0)/precision);
@@ -24,13 +24,13 @@ public class EulerMethod {
         points.add(new Point(X[0],Y[0]));
         for (int i = 1; i < amountOfNodes; i ++) {
             X[i] = x0 + i*precision;
-            Y[i] = Y[i-1]+precision * calculateF(X[i - 1], Y[i - 1]);
+            Y[i] = Y[i-1]+precision * calculateFunction(X[i - 1], Y[i - 1]);
             points.add(new Point(X[i],Y[i]));
         }
         return points;
     }
 
-    static double calculateF(double x, double y) {
+    static double calculateFunction(double x, double y) {
         switch (MainFrame.tmpCounter)
         {
             case 1: return -2*x;
