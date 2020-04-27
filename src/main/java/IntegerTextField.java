@@ -37,7 +37,7 @@ public class IntegerTextField extends JTextField {
                     Toolkit.getDefaultToolkit().beep();
                     return "";
                 }
-                return proposedValue.replace(",",".");
+                return proposedValue.replace(",", ".");
             }
         });
     }
