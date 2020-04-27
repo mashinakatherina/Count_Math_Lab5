@@ -31,6 +31,8 @@ public class MainFrame extends JFrame {
     private final IntegerTextField xn;
     private final IntegerTextField precision;
     private JButton actionButton;
+    public static int tmpCounter;
+
 
     {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -51,7 +53,7 @@ public class MainFrame extends JFrame {
         JPanel main = new JPanel();
         main.setLayout(new BoxLayout(main, BoxLayout.PAGE_AXIS));
         main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        main.setPreferredSize(new Dimension(600, 400));
+        main.setPreferredSize(new Dimension(600, 600));
         main.add(chartPanel);
 
         JPanel funcPanel = new JPanel();
@@ -83,9 +85,7 @@ public class MainFrame extends JFrame {
     }
 
     private void initButtons() {
-        actionButton = new JButton("Решить уравнение");
-        actionButton.setBackground(new Color(201, 255, 227));
-        actionButton.setFont(new Font("K", Font.BOLD, 12));
+        actionButton = new JButton("Вычислить");
         actionButton.addActionListener(event -> {
             int numberFunction = functionNames.getSelectedIndex();
             double x0Arg, y0Arg, xnArg, precisionArg;
@@ -110,12 +110,17 @@ public class MainFrame extends JFrame {
             }
             try {
                 precisionArg = Double.parseDouble(precision.getText());
+                if (precisionArg <= 0 || precisionArg > 1) {
+                    precisionArg = 0.001;
+                    JOptionPane.showMessageDialog(frame, "Будет использовано значение по умолчанию равное 0.001", "Неверное значение точности!", JOptionPane.ERROR_MESSAGE);
+                }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Неверная координата y0!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Неверное значение точности!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            points = EulerMethod.calculate(functions.get(numberFunction).getFunction(), x0Arg, y0Arg, xnArg, precisionArg);
+            tmpCounter = functions.get(numberFunction).getFunctionNumber();
+            points = EulerMethod.calculate(x0Arg, y0Arg, xnArg, precisionArg);
             initDataset();
         });
         actionButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -140,45 +145,39 @@ public class MainFrame extends JFrame {
                 new JComboBox<>(funcNames);
     }
 
-    // fixme: тут менять названия функций
     private void fillFunctions() {
-        functions.add(new NamingDoubleBiFunction((x, y) -> -2 * x, "-2x"));
-        functions.add(new NamingDoubleBiFunction((x, y) -> x - y, "x - y"));
-        functions.add(new NamingDoubleBiFunction((x, y) -> Math.log(x * x + 1), "ln(x^2+1)"));
-        functions.add(new NamingDoubleBiFunction((x, y) -> x - 2 * y, "x - 2y"));
+        functions.add(new NamingDoubleBiFunction((x, y) -> -2 * x, "-2x", 1));
+        functions.add(new NamingDoubleBiFunction((x, y) -> x - y, "x - y", 2));
+        functions.add(new NamingDoubleBiFunction((x, y) -> Math.log(x * x + 1), "ln(x^2+1)", 3));
+        functions.add(new NamingDoubleBiFunction((x, y) -> Math.sin(x) - y, "sin(x) - y", 4));
     }
 
     private void initGraph() {
         final JFreeChart chart = initChart(initDataset());
         chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(500, 270));
+        chartPanel.setPreferredSize(new Dimension(500, 500));
     }
 
     private JFreeChart initChart(final XYDataset dataset) {
 
         final JFreeChart chart = ChartFactory.createXYLineChart(
-                null,      // chart title
+                null,                          // chart title
                 "X",                      // x axis label
                 "Y",                      // y axis label
-                dataset,                  // data
-                PlotOrientation.VERTICAL,
-                true,                     // include legend
-                false,                     // tooltips
-                false                     // urls
+                dataset,                            // data
+                PlotOrientation.VERTICAL,           // orientation
+                true,                        // include legend
+                false,                      // tooltips
+                false                          // urls
         );
 
-        // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
-        chart.setBackgroundPaint(Color.white);
 
-//        final StandardLegend legend = (StandardLegend) chart.getLegend();
-        //      legend.setDisplaySeriesShapes(true);
+        chart.setBackgroundPaint(Color.lightGray);
 
-        // get a reference to the plot for further customisation...
         final XYPlot plot = chart.getXYPlot();
-        plot.setBackgroundPaint(Color.lightGray);
-        //    plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
-        plot.setDomainGridlinePaint(Color.white);
-        plot.setRangeGridlinePaint(Color.white);
+        plot.setBackgroundPaint(Color.white);
+        plot.setDomainGridlinePaint(Color.gray);
+        plot.setRangeGridlinePaint(Color.gray);
 
         final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setSeriesShapesVisible(0, false);
@@ -187,10 +186,9 @@ public class MainFrame extends JFrame {
         renderer.setSeriesShape(1, new Ellipse2D.Double(-ellipseRadius / 2, -ellipseRadius / 2, ellipseRadius, ellipseRadius));
         plot.setRenderer(renderer);
 
-        // change the auto tick unit selection to integer units only...
+
         final NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-        // OPTIONAL CUSTOMISATION COMPLETED.
 
         return chart;
 
@@ -207,7 +205,7 @@ public class MainFrame extends JFrame {
     }
 
     public static void main(String... args) {
-        MainFrame mainFrame = new MainFrame("Решение дифференциальных уровнений");
+        MainFrame mainFrame = new MainFrame("Лабораторная работа №5");
         mainFrame.pack();
         mainFrame.setMinimumSize(mainFrame.getSize());
         RefineryUtilities.centerFrameOnScreen(mainFrame);
